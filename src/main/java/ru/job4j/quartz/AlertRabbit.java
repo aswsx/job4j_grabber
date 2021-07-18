@@ -43,7 +43,6 @@ public class AlertRabbit {
         return interval;
     }
 
-
     public static class Rabbit implements Job {
         @Override
         public void execute(JobExecutionContext context) {
