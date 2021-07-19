@@ -45,8 +45,7 @@ public class AlertRabbit {
     private static int getInterval() {
         var interval = 0;
         var config = new Properties();
-        try {
-            var in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties");
+        try (var in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             config.load(in);
             interval = Integer.parseInt(config.getProperty("rabbit.interval"));
         } catch (IOException e) {
