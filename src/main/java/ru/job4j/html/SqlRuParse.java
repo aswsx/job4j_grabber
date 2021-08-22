@@ -11,13 +11,12 @@ public class SqlRuParse {
 
     public static void main(String[] args) throws Exception {
         String url = "https://www.sql.ru/forum/job-offers/";
-        for (int i = 1; i <= 5; i++) {
+        for (var i = 1; i <= 5; i++) {
             parser(url + i, index++);
         }
     }
 
     private static void parser(String url, int index) throws IOException {
-        var i = 1;
         var doc = Jsoup.connect(url).get();
         var row = doc.select(".postslisttopic");
         println("******************** Страница " + index + " ********************");
