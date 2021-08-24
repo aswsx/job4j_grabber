@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Post {
-    private int id;
+    private  int id;
     private final String title;
     private final String link;
     private final String description;
