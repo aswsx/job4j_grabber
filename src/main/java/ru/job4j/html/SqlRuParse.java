@@ -7,12 +7,11 @@ import java.io.IOException;
 import static ru.exxo.jutil.Printer.println;
 
 public class SqlRuParse {
-    private static int index = 1;
 
     public static void main(String[] args) throws Exception {
         String url = "https://www.sql.ru/forum/job-offers/";
         for (var i = 1; i <= 5; i++) {
-            parser(url + i, index++);
+            parser(url + i, i);
         }
     }
 
