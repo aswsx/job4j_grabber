@@ -1,3 +1,3 @@
 *.iml
-target
-.idea
+../job4j_grabber/target
+../job4j_grabber/.idea
