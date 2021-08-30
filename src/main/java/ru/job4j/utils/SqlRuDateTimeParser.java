@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Map;
 
 import static java.util.Map.entry;
@@ -45,7 +44,6 @@ public class SqlRuDateTimeParser implements DateTimeParser {
      */
     @Override
     public LocalDateTime parse(String parse) {
-        Locale locale = Locale.getDefault();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d M yy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         String[] dateSplit = parse.split(", ");
@@ -63,7 +61,6 @@ public class SqlRuDateTimeParser implements DateTimeParser {
         } else {
             throw new IllegalArgumentException("Illegal date inputted");
         }
-
         return LocalDateTime.of(localDate, localTime);
     }
 }
