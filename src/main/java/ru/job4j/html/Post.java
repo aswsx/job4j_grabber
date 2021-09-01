@@ -1,7 +1,6 @@
 package ru.job4j.html;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Post {
@@ -9,23 +8,25 @@ public class Post {
     private final String title;
     private final String link;
     private final String description;
-    private final LocalDateTime created = LocalDateTime.now();
+    private final LocalDateTime date;
 
-    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("dd-MMMM-EEEE-yyyy HH:mm:ss");
+    public Post(String title, String link, String description, LocalDateTime date) {
+        this.title = title;
+        this.link = link;
+        this.description = description;
+        this.date = date;
+    }
 
-    public Post(int id, String title, String link, String description) {
+    public Post(int id, String title, String link, String description, LocalDateTime date) {
         this.id = id;
         this.title = title;
         this.link = link;
         this.description = description;
+        this.date = date;
     }
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getTitle() {
@@ -40,8 +41,8 @@ public class Post {
         return description;
     }
 
-    public LocalDateTime getCreated() {
-        return created;
+    public LocalDateTime getDate() {
+        return date;
     }
 
     @Override
@@ -49,16 +50,17 @@ public class Post {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Post)) {
             return false;
         }
-        var post = (Post) o;
-        return id == post.id && Objects.equals(title, post.title);
+        Post post = (Post) o;
+        return id == post.id && Objects.equals(title, post.title) && Objects
+                .equals(link, post.link) && Objects.equals(description, post.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title);
+        return Objects.hash(id, title, link, description);
     }
 
     @Override
@@ -68,6 +70,7 @@ public class Post {
                 + ", title='" + title + '\''
                 + ", link='" + link + '\''
                 + ", description='" + description + '\''
+                + ", date=" + date
                 + '}';
     }
 }

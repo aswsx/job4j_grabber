@@ -1,45 +1,63 @@
 package ru.job4j.html;
 
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.job4j.utils.SqlRuDateTimeParser;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import static ru.exxo.jutil.Printer.println;
+public class SqlRuParse implements Parse {
+    private static final Logger LOG = LoggerFactory.getLogger(SqlRuParse.class.getName());
+    private final SqlRuDateTimeParser dateTimeParser;
 
-public class SqlRuParse {
-
-    public static void main(String[] args) throws Exception {
-        String url = "https://www.sql.ru/forum/job-offers/";
-        String postURL = "https://www.sql.ru/forum/1325330/"
-                + "lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t/";
-        println("-------------------------------pageParser----------------------------------");
-        for (var i = 1; i <= 5; i++) {
-            pageParser(url + i, i);
-        }
-        postParser(postURL);
+    public SqlRuParse(SqlRuDateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
     }
 
-    private static void pageParser(String url, int index) throws IOException {
-        var doc = Jsoup.connect(url).get();
+    @Override
+    public List<Post> list(String link) throws IOException {
+        List<Post> postList = new ArrayList<>();
+        var doc = Jsoup.connect(link).get();
         var row = doc.select(".postslisttopic");
-        println("******************** Страница " + index + " ********************");
         row.forEach(td -> {
             var href = td.child(0);
-            println(href.attr("href"));
-            println(href.text());
-            var date = td.parent().child(5);
-            println(date.text());
+            try {
+                postList.add(detail(href.attr("href")));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
+        return postList;
     }
 
-    private static void postParser(String url) throws IOException {
-        var doc = Jsoup.connect(url).get();
-        var message = doc.select(".msgBody").get(1);
-        var footer = doc.select(".msgFooter");
-        var messageText = message.text();
-        var footerText = footer.first().ownText().replace(" [] |", "");
-        println("===============================postParser===============================");
-        println(messageText);
-        println(footerText);
+    @Override
+    public Post detail(String link) throws IOException {
+        var doc = Jsoup.connect(link).get();
+        var postHeader = doc.selectFirst(".messageHeader");
+        var postName = postHeader.text().replace("[new]", "").trim();
+        var postText = doc.select(".msgBody").get(1).text();
+        var dateFromFooter = doc
+                .select(".msgFooter")
+                .first()
+                .ownText()
+                .replace(" [] |", "");
+        var parsedDate = dateTimeParser.parse(dateFromFooter);
+        return new Post(postName, link, postText, parsedDate);
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        var sqlDTParser = new SqlRuDateTimeParser();
+        var sqlParser = new SqlRuParse(sqlDTParser);
+        String link = "https://www.sql.ru/forum/job-offers";
+        var list = sqlParser.list(link);
+        var thatPost = list.get(10);
+        LOG.info(String.format("Количество постов в листе %d", list.size()));
+        LOG.info(String.format("Название поста %s", thatPost.getTitle()));
+        LOG.info(String.format("Текст поста %s", thatPost.getDescription()));
+        LOG.info(String.format("Дата создания поста %s", thatPost.getDate().toString()));
     }
 }
