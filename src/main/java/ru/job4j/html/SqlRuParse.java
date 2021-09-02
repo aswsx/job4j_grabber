@@ -36,17 +36,22 @@ public class SqlRuParse implements Parse {
 
     @Override
     public Post detail(String link) throws IOException {
+        var post = new Post();
         var doc = Jsoup.connect(link).get();
         var postHeader = doc.selectFirst(".messageHeader");
-        var postName = postHeader.text().replace("[new]", "").trim();
-        var postText = doc.select(".msgBody").get(1).text();
+        var postTitle = postHeader.text().replace("[new]", "").trim();
+        var postDescription = doc.select(".msgBody").get(1).text();
         var dateFromFooter = doc
                 .select(".msgFooter")
                 .first()
                 .ownText()
                 .replace(" [] |", "");
         var parsedDate = dateTimeParser.parse(dateFromFooter);
-        return new Post(postName, link, postText, parsedDate);
+        post.setLink(link);
+        post.setTitle(postTitle);
+        post.setDescription(postDescription);
+        post.setDate(parsedDate);
+        return post;
     }
 
     public static void main(String[] args) throws IOException {
@@ -56,9 +61,9 @@ public class SqlRuParse implements Parse {
         String link = "https://www.sql.ru/forum/job-offers";
         var list = sqlParser.list(link);
         var thatPost = list.get(10);
-        LOG.info(String.format("Количество постов в листе %d", list.size()));
-        LOG.info(String.format("Название поста %s", thatPost.getTitle()));
-        LOG.info(String.format("Текст поста %s", thatPost.getDescription()));
-        LOG.info(String.format("Дата создания поста %s", thatPost.getDate().toString()));
+        LOG.info(String.format("Количество постов в листе - %d", list.size()));
+        LOG.info(String.format("Название поста - %s", thatPost.getTitle()));
+        LOG.info(String.format("Текст поста - %s", thatPost.getDescription()));
+        LOG.info(String.format("Дата создания поста - %s", thatPost.getDate().toString()));
     }
 }
