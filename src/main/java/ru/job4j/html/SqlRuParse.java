@@ -48,9 +48,9 @@ public class SqlRuParse implements Parse {
                 .replace(" [] |", "");
         var parsedDate = dateTimeParser.parse(dateFromFooter);
         post.setLink(link);
-        post.setTitle(postTitle);
-        post.setDescription(postDescription);
-        post.setDate(parsedDate);
+        post.setName(postTitle);
+        post.setText(postDescription);
+        post.setCreated(parsedDate);
         return post;
     }
 
@@ -62,8 +62,8 @@ public class SqlRuParse implements Parse {
         var list = sqlParser.list(link);
         var thatPost = list.get(10);
         LOG.info(String.format("Количество постов в листе - %d", list.size()));
-        LOG.info(String.format("Название поста - %s", thatPost.getTitle()));
-        LOG.info(String.format("Текст поста - %s", thatPost.getDescription()));
-        LOG.info(String.format("Дата создания поста - %s", thatPost.getDate().toString()));
+        LOG.info(String.format("Название поста - %s", thatPost.getName()));
+        LOG.info(String.format("Текст поста - %s", thatPost.getText()));
+        LOG.info(String.format("Дата создания поста - %s", thatPost.getCreated().toString()));
     }
 }

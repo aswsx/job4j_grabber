@@ -1,8 +1,8 @@
-DROP TABLE IF EXISTS grabber;
-CREATE TABLE IF NOT EXISTS grabber (
+DROP TABLE IF EXISTS post;
+CREATE TABLE IF NOT EXISTS post (
     id serial primary key,
-    name text UNIQUE,
+    name text,
     text text,
-    link text,
+    link text UNIQUE,
     created timestamp
 );

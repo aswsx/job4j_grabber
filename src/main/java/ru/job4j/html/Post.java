@@ -14,11 +14,15 @@ public class Post {
         return id;
     }
 
-    public String getTitle() {
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setName(String title) {
         this.title = title;
     }
 
@@ -30,19 +34,19 @@ public class Post {
         this.link = link;
     }
 
-    public String getDescription() {
+    public String getText() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setText(String description) {
         this.description = description;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDateTime getCreated() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setCreated(LocalDateTime date) {
         this.date = date;
     }
 
@@ -55,8 +59,10 @@ public class Post {
             return false;
         }
         Post post = (Post) o;
-        return id == post.id && Objects.equals(title, post.title) && Objects
-                .equals(link, post.link) && Objects.equals(description, post.description);
+        return id == post.id
+                && Objects.equals(title, post.title)
+                && Objects.equals(link, post.link)
+                && Objects.equals(description, post.description);
     }
 
     @Override
@@ -75,3 +81,5 @@ public class Post {
                 + '}';
     }
 }
+
+
