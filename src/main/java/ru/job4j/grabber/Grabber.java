@@ -64,7 +64,7 @@ public class Grabber implements Grab {
      */
     @Override
     public void init(Parse parse, Store store, Scheduler scheduler) {
-        var data = new JobDataMap();
+         var data = new JobDataMap();
         data.put("store", store);
         data.put("parse", parse);
         var job = newJob(GrabJob.class)
@@ -124,21 +124,25 @@ public class Grabber implements Grab {
             try (ServerSocket server = new ServerSocket(Integer.parseInt(cfg.getProperty("port")))) {
                 while (!server.isClosed()) {
                     Socket socket = server.accept();
-                    try (OutputStream out = socket.getOutputStream()) {
-                        out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
-                        for (Post post : store.getAll()) {
-                            out.write(post.toString().getBytes(Charset
-                                    .forName("Windows-1251")));
-                            out.write(System.lineSeparator().getBytes());
-                        }
-                    } catch (IOException io) {
-                        io.printStackTrace();
-                    }
+                    out(store, socket);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    private void out(Store store, Socket socket) {
+        try (OutputStream out = socket.getOutputStream()) {
+            out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+            for (Post post : store.getAll()) {
+                out.write(post.toString().getBytes(Charset
+                        .forName("Windows-1251")));
+                out.write(System.lineSeparator().getBytes());
+            }
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws Exception {
