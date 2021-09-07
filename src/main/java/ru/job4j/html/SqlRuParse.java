@@ -57,8 +57,7 @@ public class SqlRuParse implements Parse {
 
     public static void main(String[] args) throws IOException {
 
-        var sqlDTParser = new SqlRuDateTimeParser();
-        var sqlParser = new SqlRuParse(sqlDTParser);
+        var sqlParser = new SqlRuParse(new SqlRuDateTimeParser());
         String link = "https://www.sql.ru/forum/job-offers";
         var list = sqlParser.list(link);
         var thatPost = list.get(10);
