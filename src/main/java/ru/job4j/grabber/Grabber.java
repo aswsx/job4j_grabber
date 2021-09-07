@@ -2,7 +2,8 @@ package ru.job4j.grabber;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-import ru.job4j.html.Post;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.job4j.html.SqlRuParse;
 import ru.job4j.utils.SqlRuDateTimeParser;
 
@@ -19,6 +20,8 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 public class Grabber implements Grab {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Grabber.class.getName());
     private final Properties cfg = new Properties();
 
     /**
@@ -64,7 +67,7 @@ public class Grabber implements Grab {
      */
     @Override
     public void init(Parse parse, Store store, Scheduler scheduler) {
-         var data = new JobDataMap();
+        var data = new JobDataMap();
         data.put("store", store);
         data.put("parse", parse);
         var job = newJob(GrabJob.class)
@@ -77,24 +80,25 @@ public class Grabber implements Grab {
                 .startNow()
                 .withSchedule(times)
                 .build();
-        shedulerShutdown(scheduler, job, trigger);
+        schedulerShutdown(scheduler, job, trigger);
     }
 
-    private void shedulerShutdown(Scheduler scheduler, JobDetail job, SimpleTrigger trigger) {
+    private void schedulerShutdown(Scheduler scheduler, JobDetail job, SimpleTrigger trigger) {
         try {
             scheduler.scheduleJob(job, trigger);
-        } catch (SchedulerException e) {
-            e.printStackTrace();
+        } catch (SchedulerException se) {
+            LOG.error("scheduleJob error", se);
         }
         try {
             Thread.sleep(1000); //добавил выключатель, иначе программа выполняется бесконечно
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ie) {
+            LOG.warn("InterruptError", ie);
+            Thread.currentThread().interrupt();
         }
         try {
             scheduler.shutdown();
-        } catch (SchedulerException e) {
-            e.printStackTrace();
+        } catch (SchedulerException se) {
+            LOG.error("SchedulerShutdownError", se);
         }
     }
 
@@ -110,11 +114,9 @@ public class Grabber implements Grab {
             var store = (Store) map.get("store");
             var parse = (Parse) map.get("parse");
             try {
-                for (Post post : parse.list("https://www.sql.ru/forum/job-offers")) {
-                    store.save(post);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                parse.list("https://www.sql.ru/forum/job-offers").forEach(store::save);
+            } catch (IOException ioe) {
+                LOG.error("executeError", ioe);
             }
         }
     }
@@ -127,7 +129,7 @@ public class Grabber implements Grab {
                     out(store, socket);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.error("webError", e);
             }
         }).start();
     }
@@ -135,13 +137,17 @@ public class Grabber implements Grab {
     private void out(Store store, Socket socket) {
         try (OutputStream out = socket.getOutputStream()) {
             out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
-            for (Post post : store.getAll()) {
-                out.write(post.toString().getBytes(Charset
-                        .forName("Windows-1251")));
-                out.write(System.lineSeparator().getBytes());
-            }
-        } catch (IOException io) {
-            io.printStackTrace();
+            store.getAll().forEach(el -> {
+                try {
+                    out.write(el.toString().getBytes(Charset
+                            .forName("Windows-1251")));
+                    out.write(System.lineSeparator().getBytes());
+                } catch (IOException ioe) {
+                    LOG.error("outWriteError", ioe);
+                }
+            });
+        } catch (IOException ioe) {
+            LOG.error("outIOError", ioe);
         }
     }
 
