@@ -21,7 +21,6 @@ import java.util.Properties;
 public class PsqlStore implements Store, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(PsqlStore.class.getName());
     private Connection cnn;
-  //  private final SqlRuDateTimeParser dateTimeParser;
 
     /**
      * Метод создает соединение с базой данных
@@ -40,8 +39,6 @@ public class PsqlStore implements Store, AutoCloseable {
         } catch (IllegalArgumentException | ClassNotFoundException e) {
             LOG.error("Connection failed...", e);
         }
-      //  dateTimeParser = null;
-
     }
 
     /**
@@ -101,7 +98,7 @@ public class PsqlStore implements Store, AutoCloseable {
             ps.setInt(1, id);
             try (var rs = ps.executeQuery()) {
                 if (rs.next()) {
-                   return postFactory(new Post(), rs);
+                    return postFactory(new Post(), rs);
                 }
             }
         } catch (SQLException se) {
@@ -114,9 +111,6 @@ public class PsqlStore implements Store, AutoCloseable {
         post.setName(rs.getString("name"));
         post.setText(rs.getString("text"));
         post.setLink(rs.getString("link"));
-//        post.setCreated(dateTimeParser.parse(rs
-//                .getTimestamp("created")
-//                .toString()));
         post.setCreated(rs.getTimestamp("created").toLocalDateTime());
         post.setId(rs.getInt("id"));
         return post;
@@ -141,19 +135,16 @@ public class PsqlStore implements Store, AutoCloseable {
         ) {
             properties.load(stream);
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ioe) {
+            LOG.error("getProperties error", ioe);
         }
         return properties;
     }
 
     public static void main(String[] args) throws Exception {
-        var sqlDTParser = new SqlRuDateTimeParser();
-        var sqlRuParse = new SqlRuParse(sqlDTParser);
+        var sqlRuParse = new SqlRuParse(new SqlRuDateTimeParser());
         try (PsqlStore store = new PsqlStore(getProperties("app.properties"))) {
-            for (Post post : sqlRuParse.list("https://www.sql.ru/forum/job-offers")) {
-                store.save(post);
-            }
+            sqlRuParse.list("https://www.sql.ru/forum/job-offers").forEach(store::save);
             String all = store.getAll().toString();
             String byId = store.findById(25).toString();
             LOG.info(all);
