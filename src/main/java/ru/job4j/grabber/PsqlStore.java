@@ -97,18 +97,17 @@ public class PsqlStore implements Store, AutoCloseable {
      */
     @Override
     public Post findById(int id) {
-        var post = new Post();
         try (var ps = cnn.prepareStatement("SELECT * FROM post WHERE id=?")) {
             ps.setInt(1, id);
             try (var rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    postFactory(post, rs);
+                   return postFactory(new Post(), rs);
                 }
             }
         } catch (SQLException se) {
             LOG.error("findById fail", se);
         }
-        return post;
+        return null;
     }
 
     private Post postFactory(Post post, ResultSet rs) throws SQLException {
